@@ -7,20 +7,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name=holy-leaf-b409
-          wranglerVersion: 'latest'           # 使用最新版 Wrangler
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}  # 可选，显示 GitHub 部署状态
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # 解决 Node 20 警告
+          projectName: holy-leaf-b409
+          directory: .
