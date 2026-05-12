@@ -147,14 +147,15 @@
   }
 
   /* Compare table */
-  .compare-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+  .compare-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 32px; }
+  .compare-table { width: 100%; min-width: 520px; border-collapse: collapse; }
   .compare-table th {
     padding: 13px 16px;
     font-size: 13px;
     font-weight: 600;
     text-align: left;
   }
-  .compare-table th:first-child { background: var(--ink); color: white; }
+  .compare-table th:first-child { background: var(--ink); color: white; width: 7em; }
   .compare-table th.math1 { background: var(--blue); color: white; }
   .compare-table th.math2 { background: var(--teal); color: white; }
   .compare-table td {
@@ -165,6 +166,11 @@
   }
   .compare-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
   .compare-table td:first-child { font-weight: 600; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+  @media (max-width: 600px) {
+    .compare-table th { padding: 10px 10px; font-size: 12px; }
+    .compare-table td { padding: 9px 10px; font-size: 12.5px; }
+    .compare-table td:first-child { font-size: 11.5px; }
+  }
   .yes { color: var(--teal); font-weight: 600; }
   .no { color: #aaa; }
   .only { color: var(--red); font-weight: 600; font-size: 12px; background: var(--light-red); padding: 2px 7px; border-radius: 4px; }
@@ -441,6 +447,7 @@
     数学一：理工科（数学、物理、机械、电气、计算机等）｜ 数学二：部分工科、农学、部分经管类。具体以目标院校招生简章为准，不可自选。
   </div>
 
+  <div class="compare-wrap">
   <table class="compare-table">
     <thead>
       <tr>
@@ -521,6 +528,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
 
   <div class="info-box red">
     <strong>⚠️ 紧凑备考提醒</strong>
