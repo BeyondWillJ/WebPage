@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeyondWJ | 个人实验室</title>
+    <style>
+        :root { --primary: #1a2a6c; --bg: #f8f9fa; }
+        body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 50px 20px; }
+        h1 { color: var(--primary); margin-bottom: 40px; }
+        
+        /* 网格布局：自动排列你的所有页面卡片 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .nav-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-decoration: none;
+            color: #333;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .icon { font-size: 30px; margin-bottom: 10px; display: block; }
+        .title { font-weight: bold; font-size: 18px; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <h1>个人网页实验室</h1>
+
+    <div class="grid">
+        <a href="https://base.beyondwj.cc/conan.html" class="nav-card">
+            <span class="icon">🔍</span>
+            <span class="title">名侦探柯南</span>
+        </a>
+
+        <a href="https://base.beyondwj.cc/project-1.html" class="nav-card">
+            <span class="icon">🧪</span>
+            <span class="title">某个实验项目</span>
+        </a>
+
+        <a href="https://base.beyondwj.cc/test.html" class="nav-card">
+            <span class="icon">📝</span>
+            <span class="title">临时测试页</span>
+        </a>
+    </div>
+
+</body>
+</html>
