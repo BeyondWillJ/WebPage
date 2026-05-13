@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新托福2026完全备考指南</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8fafc; }
+    #root { min-height: 100vh; }
+
+    /* 移动端优化 */
+    @media (max-width: 600px) {
+      .tab-bar button { padding: 8px 10px !important; font-size: 12px !important; }
+      .content-area { padding: 16px 10px !important; }
+      .header-area { padding: 16px 12px 0 !important; }
+      table { font-size: 12px !important; }
+      td, th { padding: 6px 8px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { createRoot } = ReactDOM;
+    const { useState } = React;
+
+    const colors = {
+      bg: "#f8fafc",
+      surface: "#ffffff",
+      card: "#f1f5f9",
+      border: "#e2e8f0",
+      accent: "#2563eb",
+      accentSoft: "#dbeafe",
+      green: "#059669",
+      greenSoft: "#dcfce7",
+      yellow: "#d97706",
+      yellowSoft: "#fef3c7",
+      red: "#dc2626",
+      redSoft: "#fee2e2",
+      purple: "#7c3aed",
+      purpleSoft: "#ede9fe",
+      text: "#1e293b",
+      textMuted: "#64748b",
+      textDim: "#94a3b8",
+    };
+
+    const tabs = ["概览", "阅读", "听力", "写作", "口语", "评分", "复习计划"];
+
+    function Badge({ children, color = "accent" }) {
+      const map = {
+        accent: { bg: colors.accentSoft, text: colors.accent },
+        green:  { bg: colors.greenSoft,  text: colors.green  },
+        yellow: { bg: colors.yellowSoft, text: colors.yellow },
+        red:    { bg: colors.redSoft,    text: colors.red    },
+        purple: { bg: colors.purpleSoft, text: colors.purple },
+      };
+      const c = map[color] || map.accent;
+      return (
+        <span style={{
+          background: c.bg, color: c.text,
+          padding: "2px 10px", borderRadius: 99,
+          fontSize: 12, fontWeight: 700, letterSpacing: 0.5,
+          display: "inline-block"
+        }}>{children}</span>
+      );
+    }
+
+    function Card({ children, style = {} }) {
+      return (
+        <div style={{
+          background: colors.surface, border: `1px solid ${colors.border}`,
+          borderRadius: 14, padding: "20px 22px", marginBottom: 16,
+          boxShadow: "0 1px 4px rgba(0,0,0,0.06)", ...style
+        }}>{children}</div>
+      );
+    }
+
+    function SectionTitle({ children, icon }) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, marginTop: 8 }}>
+          {icon && <span style={{ fontSize: 22 }}>{icon}</span>}
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: colors.text }}>{children}</h2>
+        </div>
+      );
+    }
+
+    function SubTitle({ children }) {
+      return <h3 style={{ margin: "18px 0 10px", fontSize: 15, fontWeight: 700, color: colors.accent }}>{children}</h3>;
+    }
+
+    function Tip({ children, type = "info" }) {
+      const map = {
+        info:    { border: colors.accent,  bg: colors.accentSoft,  icon: "💡" },
+        warn:    { border: colors.yellow,  bg: colors.yellowSoft,  icon: "⚠️" },
+        success: { border: colors.green,   bg: colors.greenSoft,   icon: "✅" },
+        danger:  { border: colors.red,     bg: colors.redSoft,     icon: "🚫" },
+      };
+      const c = map[type] || map.info;
+      return (
+        <div style={{
+          borderLeft: `3px solid ${c.border}`, background: c.bg,
+          borderRadius: "0 10px 10px 0", padding: "10px 14px",
+          marginBottom: 12, fontSize: 13.5, color: colors.text, display: "flex", gap: 8
+        }}>
+          <span>{c.icon}</span><span>{children}</span>
+        </div>
+      );
+    }
+
+    function Table({ headers, rows }) {
+      return (
+        <div style={{ overflowX: "auto", marginBottom: 16 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+            <thead>
+              <tr>
+                {headers.map((h, i) => (
+                  <th key={i} style={{
+                    background: colors.accentSoft, color: colors.accent,
+                    padding: "8px 12px", textAlign: "left", fontWeight: 700,
+                    borderBottom: `2px solid ${colors.accent}`
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr key={i} style={{ background: i % 2 === 0 ? colors.bg : colors.card }}>
+                  {row.map((cell, j) => (
+                    <td key={j} style={{ padding: "8px 12px", color: colors.text, borderBottom: `1px solid ${colors.border}` }}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    function WeekBlock({ week, phase, tasks, color = "accent" }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <div style={{ marginBottom: 10, border: `1px solid ${colors.border}`, borderRadius: 10, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          <div
+            onClick={() => setOpen(!open)}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "12px 16px", cursor: "pointer", background: colors.surface,
+              userSelect: "none"
+            }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <Badge color={color}>{week}</Badge>
+              <span style={{ fontWeight: 700, color: colors.text, fontSize: 14 }}>{phase}</span>
+            </div>
+            <span style={{ color: colors.textMuted, fontSize: 18 }}>{open ? "▲" : "▼"}</span>
+          </div>
+          {open && (
+            <div style={{ padding: "12px 16px", background: colors.card }}>
+              {tasks.map((t, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, fontSize: 13.5, color: colors.text }}>
+                  <span style={{ color: colors.accent, minWidth: 16 }}>•</span>
+                  <span>{t}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ======= TAB CONTENT =======
+
+    function OverviewTab() {
+      return (
+        <div>
+          <SectionTitle icon="🆕">2026新托福改革总览</SectionTitle>
+          <Tip type="warn">2026年1月21日起，托福iBT正式启用全新改革版本，考试结构、题型、评分体系全面升级。</Tip>
+
+          <Card>
+            <SubTitle>🗓️ 考试顺序（已调整）</SubTitle>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              {["阅读 📖", "听力 🎧", "写作 ✍️", "口语 🎤"].map((s, i, arr) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{
+                    background: colors.accentSoft, border: `1px solid ${colors.accent}`,
+                    borderRadius: 10, padding: "8px 16px", fontWeight: 700, color: colors.accent, fontSize: 15
+                  }}>{s}</div>
+                  {i < arr.length - 1 && <span style={{ color: colors.textMuted, fontSize: 20 }}>→</span>}
+                </div>
+              ))}
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13, marginTop: 10 }}>口语从第三位移至最后，有助于考生在最热机状态完成口头表达，减少紧张干扰。</p>
+          </Card>
+
+          <Card>
+            <SubTitle>⏱️ 各科时长与题量</SubTitle>
+            <Table
+              headers={["科目", "题量", "时长", "自适应"]}
+              rows={[
+                ["阅读", "35题（Stage1: 20题 + Stage2: 15题）", "约30分钟", "✅ 是"],
+                ["听力", "30题（Stage1: 15题 + Stage2: 15题）", "约29分钟", "✅ 是"],
+                ["写作", "12题（3种题型）", "约23分钟", "❌ 否"],
+                ["口语", "11-12题（2种题型）", "约8分钟", "❌ 否"],
+              ]}
+            />
+            <Tip type="success">总考试时长约90分钟（核心算分部分），加上不计分的Pretest题约2小时，较旧版大幅缩短。</Tip>
+          </Card>
+
+          <Card>
+            <SubTitle>📊 评分体系（双轨制 2026-2028过渡期）</SubTitle>
+            <Table
+              headers={["新制", "旧制对应", "CEFR等级"]}
+              rows={[
+                ["6分", "115+", "C2"],
+                ["5.5分", "110-114", "C1-C2"],
+                ["5分", "100-109", "C1"],
+                ["4.5分", "90-99", "B2-C1"],
+                ["4分", "79-89", "B2"],
+                ["3.5分", "68-78", "B1-B2"],
+                ["3分", "54-67", "B1"],
+              ]}
+            />
+            <p style={{ color: colors.textMuted, fontSize: 13 }}>总分 = 四科平均分（0.5为最小单位）。2028年起仅保留1-6分制。</p>
+          </Card>
+
+          <Card>
+            <SubTitle>🔑 改革五大核心变化</SubTitle>
+            {[
+              ["多阶段自适应", "阅读和听力分Stage1+Stage2，系统根据第一阶段表现动态调整第二阶段难度，高难度题权重更高。"],
+              ["生活化场景大增", "阅读融入社交媒体、菜单、海报；听力加入日常对话、短公告；写作考邮件；口语模拟面试。"],
+              ["纯学术题比例降低", "冷门学术话题（考古、希腊神话等）大幅减少，但高阶模块依然保留较强学术性。"],
+              ["新题型全面上线", "新增：单词填空、微博阅读、听选回复、句子重排（造句）、写邮件、句子复述（口语）、虚拟面试（口语）。"],
+              ["出分提速至72小时", "原6-10天缩短至72小时内，更利于把控申请节奏。"],
+            ].map(([title, desc], i) => (
+              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                <div style={{
+                  minWidth: 28, height: 28, borderRadius: "50%",
+                  background: colors.accentSoft, color: colors.accent,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontWeight: 800, fontSize: 13, flexShrink: 0
+                }}>{i + 1}</div>
+                <div>
+                  <div style={{ fontWeight: 700, color: colors.text, fontSize: 14 }}>{title}</div>
+                  <div style={{ color: colors.textMuted, fontSize: 13, marginTop: 3 }}>{desc}</div>
+                </div>
+              </div>
+            ))}
+          </Card>
+        </div>
+      );
+    }
+
+    function ReadingTab() {
+      return (
+        <div>
+          <SectionTitle icon="📖">阅读（Reading）详解</SectionTitle>
+          <Card>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+              <Badge color="accent">35题</Badge>
+              <Badge color="green">约30分钟</Badge>
+              <Badge color="purple">自适应两阶段</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: 0 }}>
+              Stage1（20题固定）→ 系统评估 → Stage2（15题，进入Upper或Lower难度模块）
+            </p>
+          </Card>
+
+          <SubTitle>📂 三大题型详解</SubTitle>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>① 单词填空题（Cloze / Word Completion）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              文章约70-100词，首尾句完整。从第二句第二个词起，连续10个单词被截取后半段，考生根据上下文推断并补全字母。
+            </p>
+            <Tip type="info">考查：拼写能力 + 阅读理解 + 上下文推断。每个空格的前几个字母会给出，需填写缺失的部分。</Tip>
+            <SubTitle>做题要点</SubTitle>
+            {["先通读首尾完整句，掌握文章主题方向",
+              "依靠词根词缀 + 上下文语境推断单词，不要硬猜",
+              "注意词性：动词/名词/形容词的语法位置决定填写答案",
+              "ETS喜欢把多个空塞进同一句话，要耐心分析长句结构",
+              "加强拼写练习，常见词的拼写错误会直接失分"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>② 微型文本阅读（Short Text / Social Media Reading）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              15-150字的碎片文本，包括：菜单、活动海报、Twitter式短帖、即时通讯对话等。每组2-3道单选题。
+            </p>
+            <Tip type="info">考查：主旨识别 + 非正式语言理解 + 俚语/电报式语言 + 信息检索。</Tip>
+            <SubTitle>做题要点</SubTitle>
+            {["快速定位关键信息，不要过度解读每个词",
+              "注意非正式缩写和俚语：BTW / ASAP / FYI / gonna / wanna等",
+              "菜单/海报类：关注价格、时间、地点等具体细节",
+              "即时通讯类：判断对话意图、隐含情绪，不被字面意思误导",
+              "此类题难度较低，要快速作答节约时间给学术类文章"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <h4 style={{ margin: "0 0 10px", color: colors.text }}>③ 学术短文阅读（Academic Reading）</h4>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "0 0 6px" }}>
+              约200词的学术说明性文章，附5道单选题。话题涵盖历史、艺术、经济、生命科学等，无需背景知识。
+            </p>
+            <SubTitle>六种传统题型</SubTitle>
+            <Table
+              headers={["题型", "考查内容", "答题策略"]}
+              rows={[
+                ["词汇题", "词义辨析/近义词", "结合上下文判断，不要仅凭单词记忆"],
+                ["事实信息题", "细节理解", "定位原文段落，逐一对照选项"],
+                ["推断题", "隐含逻辑", "选项须在原文中有依据，不过度推断"],
+                ["修辞目的题", "作者意图", "理解段落结构，关注转折/举例标志词"],
+                ["主旨题", "段落/全文大意", "排除过于具体的细节选项"],
+                ["句子插入题", "逻辑衔接", "关注代词指代和连接词逻辑"],
+              ]}
+            />
+          </Card>
+
+          <Card style={{ background: colors.greenSoft, border: `1px solid ${colors.green}` }}>
+            <h4 style={{ margin: "0 0 10px", color: colors.green }}>🎯 阅读高分策略</h4>
+            {["第一阶段（Stage1）务必认真对待，决定是否进入高分Upper模块",
+              "自适应机制下，进入Upper模块的题权重更高，即使错题数相同也能得更高分",
+              "模块提交后不可返回修改，每道题要做到确认后再提交",
+              "微型文本快攻（30秒-1分钟/组），学术文章精读（5-8分钟/组）",
+              "大量积累学术词汇（推荐：托福词汇3500/Barron's高频词）"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green, fontWeight: 700 }}>✓</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+      );
+    }
+
+    function ListeningTab() {
+      return (
+        <div>
+          <SectionTitle icon="🎧">听力（Listening）详解</SectionTitle>
+          <Card>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+              <Badge color="accent">30题</Badge>
+              <Badge color="green">约29分钟</Badge>
+              <Badge color="purple">自适应两阶段</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: 0 }}>
+              Stage1（15题固定）→ 系统评估 → Stage2（15题，Upper/Lower难度）。录音播完才显示题目，不可回放。
+            </p>
+          </Card>
+
+          <SubTitle>📂 四大题型详解</SubTitle>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>① 听选回复题（Listen & Select Response）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              播放一句日常生活场景中的口头提问或陈述（约30秒），从选项中选出最自然、最恰当的回应方式。共8道，每题1道单选。
+            </p>
+            <Tip type="info">考查：日常交际理解力 + 表面/隐藏含义识别 + 社交语境反应能力。</Tip>
+            <SubTitle>做题要点</SubTitle>
+            {["注意听语气：疑问句/感叹句/陈述句对应不同的回应逻辑",
+              "此题不可回放，需集中注意力听完整个句子再作答",
+              "常见场景：点餐、问路、课堂互动、活动报名等",
+              "排除逻辑明显不符的选项，优先选语境最自然的回答",
+              "练习方式：多听英语播客/情景对话，积累口语反应模式"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>② 日常短对话（Short Conversation）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              约30秒的生活场景对话（餐饮/社交/教育等），附2道单选题。考查对话意图、重要细节及隐含意义。
+            </p>
+            <SubTitle>做题要点</SubTitle>
+            {["重点听\"为什么\"和\"结果是什么\"，而不是每个单词",
+              "注意转折词（but/however/actually）后面的内容往往是答题关键",
+              "隐含意义题：说话人的情绪/态度往往通过语气体现，而非字面意思",
+              "做笔记：记下人物关系、事件、时间等关键信息"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <h4 style={{ margin: "0 0 10px", color: colors.text }}>③ 学术公告（Academic Announcement）</h4>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "0 0 6px" }}>
+              40-85字的校园公告/广播，难度较旧版降低。考查：主旨识别、细节理解、词汇掌握、推断未来行动。
+            </p>
+            <SubTitle>做题要点</SubTitle>
+            {["快速抓取：时间、地点、事件、要求等核心信息",
+              "公告类通常有\"通知做某事\"的目的，留意动词指令（must/should/please）",
+              "考查\"推断未来行动\"时，要结合全文逻辑而非只看结尾"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <h4 style={{ margin: "0 0 10px", color: colors.text }}>④ 学术讲座（Academic Lecture）</h4>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "0 0 6px" }}>
+              100-250词的学术演讲（历史/艺术/生命科学/自然科学/商业经济/社会科学），附4道单选题。难度与旧版基本持平。
+            </p>
+            <Tip type="warn">新增多口音对话场景，包括非北美口音教授和国际学生间的学术讨论，需提前适应。</Tip>
+            <SubTitle>做题要点</SubTitle>
+            {["理解主次观点：讲座的\"论点-论据\"结构，分清主要观点和举例说明",
+              "识别讲座结构词：first/then/in contrast/for example/to summarize",
+              "语法结构+推断信息：注意被动语态、条件句等暗示的逻辑关系",
+              "掌握专业+通俗词汇：学术词汇需靠日常积累",
+              "多听BBC/NPR/TED等多口音内容，训练辨音能力"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card style={{ background: colors.greenSoft, border: `1px solid ${colors.green}` }}>
+            <h4 style={{ margin: "0 0 10px", color: colors.green }}>🎯 听力高分策略</h4>
+            {["同样受自适应影响，Stage1要稳定发挥，争取进入Upper难度模块",
+              "新版耳机已升级为立体声，听力清晰度大幅提升",
+              "做笔记是关键：用简写符号快速记录关键信息（不需要逐字记）",
+              "新题型（听选回复/短对话）难度低，要确保这部分不失分",
+              "培养\"听完录音再看题\"的专注力——新题型要求瞬时记忆能力"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green, fontWeight: 700 }}>✓</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+      );
+    }
+
+    function WritingTab() {
+      return (
+        <div>
+          <SectionTitle icon="✍️">写作（Writing）详解</SectionTitle>
+          <Card>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+              <Badge color="accent">12题（3种题型）</Badge>
+              <Badge color="green">约23分钟</Badge>
+              <Badge color="red">不参与自适应</Badge>
+            </div>
+            <Tip type="warn">旧版综合写作已取消，新增句子重排题和写邮件题，保留学术讨论写作（原独立写作）。</Tip>
+          </Card>
+
+          <SubTitle>📂 三大题型详解</SubTitle>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>① 句子重排题（Sentence Construction / Word Order）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              题干给出一组打乱词序的单词/短语，要求考生重新排列成符合语法的完整句子。每题含两句话：一句提供背景，一句需重新排序。
+            </p>
+            <Tip type="info">考查：句子结构掌握 + 语法准确性 + 表达逻辑。与老版SAT语法题型相似。</Tip>
+            <SubTitle>做题要点</SubTitle>
+            {["先找主谓宾：确定核心动词，再匹配主语和宾语",
+              "注意时态：背景句提示了时态，答案句要保持时态一致",
+              "定语从句、状语从句的位置：修饰语紧跟被修饰词",
+              "介词短语通常放在句末或句首作状语",
+              "副词（always/often/never）通常放在助动词之后、主动词之前",
+              "练习方式：每日做5-10道句子改写和语序练习"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>② 写邮件题（Email Writing）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              限时7分钟，根据题目要求撰写一封邮件（如课程建议信、活动咨询信、延长邀请、提出解决方案等）。
+            </p>
+            <Tip type="info">考查：邮件格式规范 + 语体适切性 + 问题解决逻辑 + 词汇语法准确性。</Tip>
+            <SubTitle>邮件结构模板</SubTitle>
+            <div style={{ background: colors.card, borderRadius: 8, padding: "12px 14px", fontSize: 13, fontFamily: "monospace", color: colors.text, marginBottom: 12, border: `1px solid ${colors.border}` }}>
+              <div style={{ color: colors.accent }}>Subject: [简明标题]</div>
+              <div style={{ marginTop: 6 }}>Dear [称呼],</div>
+              <div style={{ marginTop: 6, color: colors.textMuted }}>[开头：说明写信目的，1-2句]</div>
+              <div style={{ marginTop: 6, color: colors.textMuted }}>[主体：具体内容/请求/建议，2-3句]</div>
+              <div style={{ marginTop: 6, color: colors.textMuted }}>[结尾：表达期待/感谢，1句]</div>
+              <div style={{ marginTop: 6 }}>Best regards, / Sincerely,</div>
+              <div>[Your Name]</div>
+            </div>
+            <SubTitle>做题要点</SubTitle>
+            {["7分钟要做到：读题(30s) → 构思(30s) → 写作(5min) → 检查(1min)",
+              "语体：正式邮件用Dear/Sincerely，半正式可用Hi/Thanks",
+              "格式完整：Subject、称呼、正文分段、落款缺一不可",
+              "内容切题：直接回应题目要求的情境，不要偏题",
+              "常见场景练习：请假/道歉、咨询课程、推荐/建议、投诉/解决问题"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <h4 style={{ margin: "0 0 10px", color: colors.text }}>③ 学术讨论写作（Academic Discussion Writing）</h4>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "0 0 6px" }}>
+              与旧版独立写作形式类似：教授抛出话题，两位学生各抒己见，考生需在10分钟内用100词以上表达自己的观点并为讨论做出贡献。
+            </p>
+            <Tip type="success">此题型已有一定备考资料积累，与旧版独立写作逻辑相近，是三种题型中最容易准备的。</Tip>
+            <SubTitle>推荐答题结构</SubTitle>
+            {[
+              ["句1-2", "明确立场：I agree/disagree with [Student A/B]'s point that..."],
+              ["句3-5", "提出自己的观点并给出论据（具体例子或逻辑推理）"],
+              ["句6-7", "补充说明：既呼应讨论又增加新价值（避免重复已有内容）"],
+              ["句8", "简短总结或升华"],
+            ].map(([time, desc], i) => (
+              <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
+                <Badge color="purple">{time}</Badge>
+                <span style={{ fontSize: 13.5, color: colors.text }}>{desc}</span>
+              </div>
+            ))}
+            <SubTitle>做题要点</SubTitle>
+            {["10分钟内写100+词，目标150词左右，不要超过200词（影响质量）",
+              "必须表达明确立场，不能两边都支持或完全回避",
+              "引用学生观点时要推进讨论而非重复：'Although Ken raises a valid point, I would argue...'",
+              "新评分标准更注重语言使用的准确性与有效性，避免语法错误",
+              "学习\"同意性反驳\"技巧：承认对方观点的合理性，再提出更强论点"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+      );
+    }
+
+    function SpeakingTab() {
+      return (
+        <div>
+          <SectionTitle icon="🎤">口语（Speaking）详解</SectionTitle>
+          <Card>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+              <Badge color="accent">11-12题（2种题型）</Badge>
+              <Badge color="green">约8分钟</Badge>
+              <Badge color="red">不参与自适应</Badge>
+            </div>
+            <Tip type="warn">旧版独立口语和综合口语全部取消！新增句子复述题和虚拟面试题，无准备时间，即时作答。口语被调至最后一科。</Tip>
+          </Card>
+
+          <SubTitle>📂 两大题型详解</SubTitle>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>① 句子复述题（Listen & Repeat / Sentence Repetition）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              逐句听文章音频（文本不显示在屏幕上），每句之后有8-12秒准确复述刚才的句子内容。通常由同一场景下7-8句组成，逐句变长变复杂，配有背景图或流程图。
+            </p>
+            <Tip type="info">考查：精准复述能力 + 发音语调 + 瞬时记忆力 + 语法复现准确性。</Tip>
+            <SubTitle>做题要点</SubTitle>
+            {["边听边在脑中复现句子结构，而非逐字记忆",
+              "抓住关键词（主语+动词+宾语）+ 修饰成分，允许轻微措辞改动",
+              "发音要清晰，语速自然，不要因紧张而过快或拉长停顿",
+              "句子会逐渐变长，前几句务必保持高准确率",
+              "练习：每日听短句跟读（VOA慢速/BBC Learning English），训练听说同步"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+              <h4 style={{ margin: 0, color: colors.text }}>② 虚拟面试题（Virtual Interview）</h4>
+              <Badge color="yellow">新题型</Badge>
+            </div>
+            <p style={{ color: colors.textMuted, fontSize: 13.5, margin: "10px 0 6px" }}>
+              考官先阐述学术框架，再通过预录制视频提问，共3道问题。场景主要是奖学金、项目申请等校园面试。第1题问个人经历，第2-3题要求表达观点并给出论据支撑。
+            </p>
+            <Tip type="warn">无准备时间，需即时作答！这是最大挑战。考查：语言丰富度、语调节奏、词汇语法。</Tip>
+            <SubTitle>三题答题逻辑</SubTitle>
+            {[
+              ["第1题（个人经历）", "STAR结构：Situation → Task → Action → Result。具体化，避免泛泛而谈。"],
+              ["第2题（观点论述）", "直接表态 → 给出理由1 → 举例支撑 → 简单总结。60-90秒。"],
+              ["第3题（深度论证）", "在第2题基础上进一步展开，可引用对立观点再反驳，体现批判性思维。"],
+            ].map(([title, desc], i) => (
+              <div key={i} style={{ marginBottom: 12 }}>
+                <div style={{ fontWeight: 700, color: colors.accent, fontSize: 14, marginBottom: 4 }}>{title}</div>
+                <div style={{ fontSize: 13.5, color: colors.textMuted }}>{desc}</div>
+              </div>
+            ))}
+            <SubTitle>做题要点</SubTitle>
+            {["培养即时反应能力：平时练习\"听题就说\"，不给自己打草稿的习惯",
+              "语速：不要太快，面试官需要听清楚你说的内容",
+              "填充词管理：减少\"um/uh\"，用\"Well, I think...\"或\"That's a great question\"过渡",
+              "内容比流利度更重要：有逻辑、有例子的回答得分高于流利但空洞的回答",
+              "口语可在录音倒计时结束前手动停止，进入下一题（新功能）"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.green }}>→</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+      );
+    }
+
+    function ScoringTab() {
+      return (
+        <div>
+          <SectionTitle icon="📊">评分体系详解</SectionTitle>
+
+          <Card>
+            <SubTitle>🔢 1-6分制（新制）详解</SubTitle>
+            <Table
+              headers={["新制分数", "CEFR等级", "能力描述", "旧制约合"]}
+              rows={[
+                ["6", "C2", "精通级：学术写作/演讲无障碍", "115+"],
+                ["5.5", "C1-C2", "高级：复杂学术任务游刃有余", "110-114"],
+                ["5", "C1", "高级：独立完成学术交流任务", "100-109"],
+                ["4.5", "B2-C1", "中高级：应对大多数学术场景", "90-99"],
+                ["4", "B2", "中级：基本学术交流无障碍", "79-89"],
+                ["3.5", "B1-B2", "中级：简单学术任务可完成", "68-78"],
+                ["3", "B1", "初中级：基础交流可胜任", "54-67"],
+              ]}
+            />
+          </Card>
+
+          <Card>
+            <SubTitle>➗ 总分计算规则</SubTitle>
+            <div style={{ background: colors.card, borderRadius: 8, padding: "14px 16px", marginBottom: 12, border: `1px solid ${colors.border}` }}>
+              <div style={{ color: colors.accent, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>总分 = (阅读 + 听力 + 写作 + 口语) ÷ 4</div>
+              <div style={{ color: colors.textMuted, fontSize: 13 }}>• 最小单位：0.5分</div>
+              <div style={{ color: colors.textMuted, fontSize: 13 }}>• 四舍五入规则："tie goes to runner"：平均分5.125 → 5.0；平均分5.250 → 5.5</div>
+            </div>
+            <Tip type="info">每科权重相同，均等拉分，某科特别弱会明显影响总分。</Tip>
+          </Card>
+
+          <Card>
+            <SubTitle>🏫 常见院校要求对照（参考）</SubTitle>
+            <Table
+              headers={["目标院校层次", "新制目标分", "旧制对应", "备注"]}
+              rows={[
+                ["TOP10名校", "5.5-6", "110+", "高竞争力申请建议冲6分"],
+                ["TOP20-50", "5-5.5", "100-109", "大多数旗舰校要求"],
+                ["TOP50-100", "4.5-5", "90-99", "基本录取线"],
+                ["其他院校", "4-4.5", "79-89", "一般可录取"],
+              ]}
+            />
+            <Tip type="warn">以上为参考估算，具体要求以各院校官网为准。过渡期成绩单同时展示新旧两套分数。</Tip>
+          </Card>
+
+          <Card>
+            <SubTitle>🤖 自适应评分机制说明</SubTitle>
+            {[
+              "阅读/听力：Stage2题目难度由Stage1表现决定，高难度模块即使同样错题数也能得更高分",
+              "进入Upper模块是冲高分的关键——相当于\"进了高分通道\"",
+              "写作和口语不参与自适应，评分基于表现绝对质量",
+              "具体算分权重ETS未公开，但高难度正确答题的价值明显更高",
+            ].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, fontSize: 13.5, color: colors.text }}>
+                <span style={{ color: colors.yellow }}>⚡</span><span>{t}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+      );
+    }
+
+    function PlanTab() {
+      const phases = [
+        {
+          week: "第1-2周", phase: "诊断 & 基础搭建（5月15日-5月28日）", color: "purple",
+          tasks: [
+            "完成ETS官方新托福样题全套，摸清各题型感觉与当前水平",
+            "制定个人薄弱科目排序（通常：口语 > 写作 > 听力 > 阅读）",
+            "开始背诵托福核心词汇（推荐：《托福词汇胜经》或Anki词组，每日50词）",
+            "阅读：每日精读1篇学术短文（200词），做词汇+推断题练习",
+            "听力：每日听20分钟BBC/NPR，训练英语听力习惯",
+            "写作：练习5篇邮件写作，熟悉格式规范（Dear/Subject/落款）",
+            "口语：每日大声朗读英语短文5-10分钟，纠正发音习惯",
+          ]
+        },
+        {
+          week: "第3-5周", phase: "专项突破 · 阅读+听力（5月29日-6月18日）", color: "accent",
+          tasks: [
+            "【阅读】每日完成1套Stage1模拟（20题），重点计时，培养答题节奏",
+            "【阅读】专项练习新题型：每日10道单词填空 + 5组微型文本阅读",
+            "【阅读】学术文章精读：标记段落结构、作者意图、论证逻辑",
+            "【听力】每日精听1段学术讲座（100-250词），记笔记+做4题",
+            "【听力】专项练习新题型：每日练10道听选回复题 + 5组短对话",
+            "【听力】多口音训练：寻找非北美口音英语内容（BBC/澳洲ABC/印度英语）",
+            "词汇：坚持每日50词，开始复习第1-2周词汇",
+            "写作：完成5篇学术讨论写作，练习100-150词精准表达",
+          ]
+        },
+        {
+          week: "第6-8周", phase: "专项突破 · 写作+口语（6月19日-7月9日）", color: "green",
+          tasks: [
+            "【写作】句子重排题：每日15-20道语序练习，专攻定语从句+状语从句结构",
+            "【写作】邮件写作：每日1封，覆盖所有场景（请假/咨询/投诉/建议）",
+            "【写作】学术讨论写作：用计时器严格控制10分钟，反复练习论点展开",
+            "【口语】句子复述：每日跟读练习（推荐：ELSA Speak / 系统跟读软件）",
+            "【口语】虚拟面试：每日练习3-5个面试问题，即时录音并回听评估",
+            "【口语】积累面试常用表达：介绍自己的学习/经历/目标的模板句",
+            "继续词汇：每日30词（新） + 复习（旧），进入学术词汇AWL词表",
+            "每周至少完成1套完整的写作+口语模拟练习",
+          ]
+        },
+        {
+          week: "第9-11周", phase: "综合模拟 & 强化（7月10日-7月30日）", color: "yellow",
+          tasks: [
+            "每周完成1-2套完整新托福全科模拟（约2小时，严格计时）",
+            "模拟后：详细对题分析，记录错题模式，针对性补弱",
+            "重点攻关：自适应机制下Stage1的答题策略——确保稳定高正确率",
+            "口语：找语言伙伴或老师进行模拟面试练习，获取真实反馈",
+            "写作：提交作文给老师/AI批改，重点改进语法错误和逻辑漏洞",
+            "听力：尝试不记笔记听完一遍再看题，训练记忆留存能力",
+            "词汇：冲刺阶段——集中复习已学词汇，不再引入大量新词",
+          ]
+        },
+        {
+          week: "第12-14周", phase: "冲刺强化 & 查漏补缺（7月31日-8月20日）", color: "red",
+          tasks: [
+            "每周2套全真模拟，严格模拟考场条件（独立房间、计时、不查词）",
+            "分析模拟成绩趋势，锁定最后短板进行定点突破",
+            "阅读：冲刺Stage2练习，适应Upper难度的学术长文和复杂推断题",
+            "听力：强化多口音适应，收听ETS官方网站的听力练习材料",
+            "写作：建立个人\"写邮件万能句库\"和\"学术讨论高频论点库\"",
+            "口语：建立\"虚拟面试答题模板\"——个人故事/学习经历/观点表达套路",
+            "心理准备：建立考场应对策略，了解考场流程（新版无第二次试音）",
+          ]
+        },
+        {
+          week: "第15-20周", phase: "维持状态 & 考前冲刺（8月21日-10月考试）", color: "green",
+          tasks: [
+            "每周1套完整模拟，维持手感，避免过度刷题导致疲劳",
+            "考前1-2周：降低训练强度，保证睡眠质量和精力状态",
+            "最后一周：只做轻量练习（每日30分钟），以信心确认为主",
+            "考前3天：确认考场位置/时间/所需证件，测试设备（家庭版考生）",
+            "考前晚上：早睡，不要临时突击新内容",
+            "考试当天：提前到考场，调整好耳机和试音（注意：只有一次试音）",
+            "记住：口语在最后，不要因前三科影响情绪，保持到最后！",
+          ]
+        },
+      ];
+
+      return (
+        <div>
+          <SectionTitle icon="📅">个人复习计划</SectionTitle>
+          <Card style={{ background: colors.accentSoft, border: `1px solid ${colors.accent}` }}>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ color: colors.textMuted, fontSize: 12 }}>开始备考</div>
+                <div style={{ fontWeight: 800, color: colors.accent, fontSize: 16 }}>2025年5月15日</div>
+              </div>
+              <div style={{ color: colors.textDim, display: "flex", alignItems: "center" }}>→</div>
+              <div>
+                <div style={{ color: colors.textMuted, fontSize: 12 }}>目标考试</div>
+                <div style={{ fontWeight: 800, color: colors.green, fontSize: 16 }}>2026年10月（约20周）</div>
+              </div>
+              <div style={{ color: colors.textDim, display: "flex", alignItems: "center" }}>→</div>
+              <div>
+                <div style={{ color: colors.textMuted, fontSize: 12 }}>备考时长</div>
+                <div style={{ fontWeight: 800, color: colors.yellow, fontSize: 16 }}>约20-22周</div>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <SubTitle>📊 每周时间分配建议（每日1.5-2小时）</SubTitle>
+            <Table
+              headers={["科目", "阶段1（1-5周）", "阶段2（6-11周）", "阶段3（12+周）"]}
+              rows={[
+                ["词汇", "40分钟/天", "30分钟/天", "20分钟/天（复习为主）"],
+                ["阅读", "30分钟/天", "20分钟/天", "模拟为主"],
+                ["听力", "30分钟/天", "20分钟/天", "模拟为主"],
+                ["写作", "20分钟/天", "30分钟/天", "模拟为主"],
+                ["口语", "10分钟/天", "30分钟/天", "模拟为主"],
+              ]}
+            />
+          </Card>
+
+          <div style={{ marginBottom: 8, color: colors.textMuted, fontSize: 13 }}>点击展开每阶段详细任务：</div>
+          {phases.map((p, i) => (
+            <WeekBlock key={i} week={p.week} phase={p.phase} tasks={p.tasks} color={p.color} />
+          ))}
+
+          <Card>
+            <SubTitle>📚 推荐备考资源</SubTitle>
+            {[
+              ["官方资源", "ETS官网新托福样题（免费）、TestReady模拟系统"],
+              ["词汇", "托福词汇胜经 / Anki + 托福高频词卡组 / Magoosh Vocabulary"],
+              ["阅读", "旧版TPO阅读练习（题型逻辑相通）+ 新版官方样题"],
+              ["听力", "TPO历年听力 + BBC Learning English + NPR"],
+              ["写作", "旧版TPO独立写作题目 + 新版邮件写作练习"],
+              ["口语", "ELSA Speak（发音） + 录音自评 + 语言伙伴"],
+              ["语法", "《英语语法新思维》/ 《剑桥英语语法》进阶"],
+            ].map(([cat, res], i) => (
+              <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start", flexWrap: "wrap" }}>
+                <Badge color={["accent","green","yellow","purple","red","accent","green"][i]}>{cat}</Badge>
+                <span style={{ fontSize: 13.5, color: colors.text }}>{res}</span>
+              </div>
+            ))}
+          </Card>
+
+          <Tip type="success">核心原则：新题型（口语复述/虚拟面试/写邮件/听选回复）要早练习、多适应；旧题型逻辑依然有效，旧版TPO仍有参考价值。</Tip>
+        </div>
+      );
+    }
+
+    function App() {
+      const [activeTab, setActiveTab] = useState(0);
+
+      const content = [
+        <OverviewTab />, <ReadingTab />, <ListeningTab />,
+        <WritingTab />, <SpeakingTab />, <ScoringTab />, <PlanTab />
+      ];
+
+      return (
+        <div style={{ background: colors.bg, minHeight: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif", color: colors.text }}>
+          {/* Header */}
+          <div className="header-area" style={{ background: colors.surface, borderBottom: `1px solid ${colors.border}`, padding: "20px 24px 0", boxShadow: "0 1px 3px rgba(0,0,0,0.07)" }}>
+            <div style={{ maxWidth: 800, margin: "0 auto" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6, flexWrap: "wrap" }}>
+                <div style={{
+                  background: colors.accentSoft, border: `1.5px solid ${colors.accent}`,
+                  borderRadius: 10, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: colors.accent
+                }}>2026 NEW TOEFL iBT</div>
+                <div style={{ fontSize: 12, color: colors.textMuted }}>自2026年1月21日起正式实施</div>
+              </div>
+              <h1 style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 900, color: colors.text }}>
+                新托福完全备考指南
+              </h1>
+              <p style={{ margin: "0 0 16px", fontSize: 13.5, color: colors.textMuted }}>
+                题型详解 · 做题要点 · 20周备考计划（260515 → 2610考试）
+              </p>
+              {/* Tabs */}
+              <div className="tab-bar" style={{ display: "flex", gap: 2, overflowX: "auto", paddingBottom: 0, scrollbarWidth: "none" }}>
+                {tabs.map((t, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveTab(i)}
+                    style={{
+                      background: "none", border: "none", cursor: "pointer",
+                      padding: "8px 16px", fontSize: 13.5, fontWeight: activeTab === i ? 700 : 400,
+                      color: activeTab === i ? colors.accent : colors.textMuted,
+                      borderBottom: activeTab === i ? `2px solid ${colors.accent}` : "2px solid transparent",
+                      whiteSpace: "nowrap", transition: "all 0.15s",
+                      flexShrink: 0
+                    }}
+                  >{t}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="content-area" style={{ maxWidth: 800, margin: "0 auto", padding: "24px 16px" }}>
+            {content[activeTab]}
+          </div>
+        </div>
+      );
+    }
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

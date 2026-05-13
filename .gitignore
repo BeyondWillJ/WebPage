@@ -4,3 +4,9 @@
 !.dev.vars.example
 .env*
 !.env.example
+# python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
