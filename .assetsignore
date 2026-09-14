@@ -1,0 +1,12 @@
+# Dependencies installed by Wrangler Action are not website assets.
+**/node_modules
+
+# Repository, deployment, and local development metadata.
+**/.git
+**/.github
+**/.wrangler
+.gitignore
+.assetsignore
+wrangler.jsonc
+package.json
+package-lock.json
